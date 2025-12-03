@@ -19,43 +19,65 @@ function initChart() {
     totalData.push(sum);
   }
 
-  datasets.push({
-    label: 'Total',
-    data: totalData,
-    borderColor: '#94a3b8',
-    tension: 0.2,
-    fill: false,
-    borderDash: [4, 2]
-  });
-
-  if (state.trendSettings.showMovingAverage && totalData.length >= state.trendSettings.movingAveragePeriod) {
-    const maData = calculateMovingAverage(totalData, state.trendSettings.movingAveragePeriod);
+  if (state.trendSettings.showTotal) {
     datasets.push({
-      label: `Total MA(${state.trendSettings.movingAveragePeriod})`,
-      data: maData,
-      borderColor: 'rgba(251, 191, 36, 1)',
+      label: 'Total',
+      data: totalData,
+      borderColor: '#94a3b8',
+      tension: 0.2,
+      fill: false,
+      borderDash: [4, 2]
+    });
+  }
+
+  // Calculate EMAs for coloring logic
+  const longEmaData = totalData.length >= 2 ? calculateEMA(totalData, state.trendSettings.longEmaPeriod) : [];
+  const shortEmaData = totalData.length >= 2 ? calculateEMA(totalData, state.trendSettings.shortEmaPeriod) : [];
+
+  // Long EMA (baseline) - 6 sprint average
+  if (state.trendSettings.showLongEMA && longEmaData.length > 0) {
+    datasets.push({
+      label: `Baseline EMA(${state.trendSettings.longEmaPeriod})`,
+      data: longEmaData,
+      borderColor: 'rgba(251, 191, 36, 0.9)',
       tension: 0.3,
       fill: false,
       borderWidth: 3,
       borderDash: [8, 4],
       pointRadius: 0,
-      pointHoverRadius: 4,
+      pointHoverRadius: 5,
       spanGaps: true
     });
   }
 
-  if (state.trendSettings.showLinearRegression && totalData.length >= 2) {
-    const lrData = calculateLinearRegression(totalData);
+  // Short EMA - 2 sprint average with dynamic coloring
+  if (state.trendSettings.showShortEMA && shortEmaData.length > 0) {
+    // Create segment colors based on position relative to baseline
+    const segmentColors = shortEmaData.map((shortValue, idx) => {
+      if (longEmaData.length > 0 && idx < longEmaData.length) {
+        return shortValue >= longEmaData[idx]
+          ? 'rgba(52, 211, 153, 1)'  // Green - above baseline
+          : 'rgba(239, 68, 68, 1)';   // Red - below baseline
+      }
+      return 'rgba(52, 211, 153, 1)'; // Default green
+    });
+
     datasets.push({
-      label: 'Total Trend (Linear)',
-      data: lrData,
-      borderColor: 'rgba(52, 211, 153, 0.7)',
-      backgroundColor: 'rgba(52, 211, 153, 0.1)',
-      tension: 0,
+      label: `Short EMA(${state.trendSettings.shortEmaPeriod})`,
+      data: shortEmaData,
+      segment: {
+        borderColor: (ctx) => {
+          const idx = ctx.p0DataIndex;
+          return segmentColors[idx] || 'rgba(52, 211, 153, 1)';
+        }
+      },
+      borderColor: 'rgba(52, 211, 153, 1)', // Fallback color
+      tension: 0.3,
       fill: false,
-      borderWidth: 2,
-      borderDash: [2, 2],
-      pointRadius: 0
+      borderWidth: 3,
+      pointRadius: 0,
+      pointHoverRadius: 5,
+      spanGaps: true
     });
   }
 
@@ -96,39 +118,56 @@ function initChart() {
 }
 
 function restoreTrendToggles() {
-    const toggleMA = document.getElementById('toggleMovingAverage');
-    const toggleLR = document.getElementById('toggleLinearRegression');
-    if (toggleMA) toggleMA.checked = state.trendSettings.showMovingAverage;
-    if (toggleLR) toggleLR.checked = state.trendSettings.showLinearRegression;
+    const toggleTotal = document.getElementById('toggleTotal');
+    const toggleShortEMA = document.getElementById('toggleShortEMA');
+    const toggleLongEMA = document.getElementById('toggleLongEMA');
+    if (toggleTotal) toggleTotal.checked = state.trendSettings.showTotal;
+    if (toggleShortEMA) toggleShortEMA.checked = state.trendSettings.showShortEMA;
+    if (toggleLongEMA) toggleLongEMA.checked = state.trendSettings.showLongEMA;
 }
 
 function setupTrendlineEventListeners() {
-    const toggleMA = document.getElementById('toggleMovingAverage');
-    const toggleLR = document.getElementById('toggleLinearRegression');
+    const toggleTotal = document.getElementById('toggleTotal');
+    const toggleShortEMA = document.getElementById('toggleShortEMA');
+    const toggleLongEMA = document.getElementById('toggleLongEMA');
     const messageEl = document.getElementById('message');
 
-    if (toggleMA) {
-        toggleMA.addEventListener('change', (e) => {
-            state.trendSettings.showMovingAverage = e.target.checked;
+    if (toggleTotal) {
+        toggleTotal.addEventListener('change', (e) => {
+            state.trendSettings.showTotal = e.target.checked;
             initChart();
             saveState();
             showMessage(
                 messageEl,
-                e.target.checked ? 'Moving average enabled' : 'Moving average disabled',
+                e.target.checked ? 'Total line enabled' : 'Total line disabled',
                 'info',
                 1500
             );
         });
     }
 
-    if (toggleLR) {
-        toggleLR.addEventListener('change', (e) => {
-            state.trendSettings.showLinearRegression = e.target.checked;
+    if (toggleShortEMA) {
+        toggleShortEMA.addEventListener('change', (e) => {
+            state.trendSettings.showShortEMA = e.target.checked;
             initChart();
             saveState();
             showMessage(
                 messageEl,
-                e.target.checked ? 'Linear regression enabled' : 'Linear regression disabled',
+                e.target.checked ? 'Short EMA (2-sprint) enabled' : 'Short EMA disabled',
+                'info',
+                1500
+            );
+        });
+    }
+
+    if (toggleLongEMA) {
+        toggleLongEMA.addEventListener('change', (e) => {
+            state.trendSettings.showLongEMA = e.target.checked;
+            initChart();
+            saveState();
+            showMessage(
+                messageEl,
+                e.target.checked ? 'Baseline EMA (6-sprint) enabled' : 'Baseline EMA disabled',
                 'info',
                 1500
             );

@@ -36,14 +36,19 @@
         <h3>Trend Lines</h3>
         <div class="trend-toggles">
           <label class="toggle-switch">
-            <input type="checkbox" id="toggleMovingAverage">
-            <span class="toggle-label">Moving Average (3-sprint)</span>
+            <input type="checkbox" id="toggleTotal" checked>
+            <span class="toggle-label">Total Velocity</span>
           </label>
           <label class="toggle-switch">
-            <input type="checkbox" id="toggleLinearRegression">
-            <span class="toggle-label">Linear Regression</span>
+            <input type="checkbox" id="toggleShortEMA" checked>
+            <span class="toggle-label">Short EMA (2-sprint) - Recent Performance</span>
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleLongEMA" checked>
+            <span class="toggle-label">Baseline EMA (6-sprint) - Average Capacity</span>
           </label>
         </div>
+        <p class="ema-hint">When the Short EMA is above the Baseline, the team is working above normal capacity. When below, the team may be in a recovery period or facing blockers.</p>
       </div>
       <canvas id="velocityChart"></canvas>
     </section>

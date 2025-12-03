@@ -5,46 +5,23 @@ function escapeHtml(s) {
   return String(s).replace(/[&<"']/g, ch => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"}[ch]));
 }
 
-function calculateMovingAverage(data, period) {
-  if (!Array.isArray(data) || period < 2 || data.length === 0) return [];
+function calculateEMA(data, period) {
+  if (!Array.isArray(data) || period < 1 || data.length === 0) return [];
 
   const result = [];
-  for (let i = 0; i < data.length; i++) {
-    if (i < period - 1) {
-      result.push(null);
-    } else {
-      let sum = 0;
-      for (let j = i - period + 1; j <= i; j++) {
-        sum += (data[j] || 0);
-      }
-      result.push(sum / period);
-    }
-  }
-  return result;
-}
+  const multiplier = 2 / (period + 1);
 
-function calculateLinearRegression(data) {
-  if (!Array.isArray(data) || data.length < 2) return [];
+  // Start with first value as the initial EMA
+  let ema = data[0] || 0;
+  result.push(ema);
 
-  const n = data.length;
-  let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
-
-  for (let i = 0; i < n; i++) {
-    const x = i;
-    const y = data[i] || 0;
-    sumX += x;
-    sumY += y;
-    sumXY += x * y;
-    sumXX += x * x;
+  // Calculate EMA for remaining values
+  for (let i = 1; i < data.length; i++) {
+    const currentValue = data[i] || 0;
+    ema = (currentValue * multiplier) + (ema * (1 - multiplier));
+    result.push(ema);
   }
 
-  const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-  const intercept = (sumY - slope * sumX) / n;
-
-  const result = [];
-  for (let i = 0; i < n; i++) {
-    result.push(slope * i + intercept);
-  }
   return result;
 }
 

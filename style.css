@@ -135,11 +135,12 @@ h1{margin:0;font-size:20px}
 /* Trend line controls */
 .chart-controls{margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid rgba(255,255,255,0.04)}
 .chart-controls h3{margin:0 0 10px 0;font-size:14px;color:var(--accent-a);font-weight:600}
-.trend-toggles{display:flex;gap:20px;flex-wrap:wrap}
+.trend-toggles{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:10px}
 .toggle-switch{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
 .toggle-switch input[type="checkbox"]{width:18px;height:18px;cursor:pointer;accent-color:var(--accent-a)}
 .toggle-label{color:var(--text);font-size:13px}
 .toggle-switch:hover .toggle-label{color:var(--accent-a)}
+.ema-hint{margin:8px 0 0 0;padding:8px 10px;background:rgba(52,211,153,0.08);border-left:3px solid var(--accent-c);border-radius:4px;color:var(--muted);font-size:12px;line-height:1.4}
 
 .table-wrap{background:var(--panel);padding:12px;border-radius:8px;margin-bottom:12px}
 #dataTable{width:100%;border-collapse:collapse}

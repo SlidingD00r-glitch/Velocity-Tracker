@@ -5,9 +5,11 @@ let state = {
   teamData: [], // { name, data: [], color }
   storyPointsApp: [],
   trendSettings: {
-    showMovingAverage: false,
-    showLinearRegression: false,
-    movingAveragePeriod: 3
+    showTotal: true,
+    showShortEMA: true,
+    showLongEMA: true,
+    shortEmaPeriod: 2,
+    longEmaPeriod: 6
   },
   calcSettings: {}
 };
@@ -48,9 +50,11 @@ function loadState() {
     }
 
     if (st.trendSettings && typeof st.trendSettings === 'object') {
-      state.trendSettings.showMovingAverage = st.trendSettings.showMovingAverage || false;
-      state.trendSettings.showLinearRegression = st.trendSettings.showLinearRegression || false;
-      state.trendSettings.movingAveragePeriod = st.trendSettings.movingAveragePeriod || 3;
+      state.trendSettings.showTotal = st.trendSettings.showTotal !== undefined ? st.trendSettings.showTotal : true;
+      state.trendSettings.showShortEMA = st.trendSettings.showShortEMA !== undefined ? st.trendSettings.showShortEMA : true;
+      state.trendSettings.showLongEMA = st.trendSettings.showLongEMA !== undefined ? st.trendSettings.showLongEMA : true;
+      state.trendSettings.shortEmaPeriod = st.trendSettings.shortEmaPeriod || 2;
+      state.trendSettings.longEmaPeriod = st.trendSettings.longEmaPeriod || 6;
     }
 
     showMessage(document.getElementById('message'), 'Loaded saved data', 'info', 1400);
