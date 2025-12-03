@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Team Velocity Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Team Velocity Tracker</h1>
+      <div class="controls">
+        <div class="team-management">
+          <div id="teamNamesContainer" class="team-names"></div>
+          <div class="team-actions">
+            <button id="addTeamBtn" class="small-btn">+ Add Team</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="import-export">
+      <div>
+        <input id="fileInput" type="file" accept=".csv,.xlsx,.xls,text/csv" />
+        <button id="downloadBtn">Export CSV</button>
+        <button id="clearSavedBtn">Clear Saved Data</button>
+      </div>
+      <div id="message" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="chart-wrap">
+      <div class="chart-controls">
+        <h3>Trend Lines</h3>
+        <div class="trend-toggles">
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleMovingAverage">
+            <span class="toggle-label">Moving Average (3-sprint)</span>
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleLinearRegression">
+            <span class="toggle-label">Linear Regression</span>
+          </label>
+        </div>
+      </div>
+      <canvas id="velocityChart"></canvas>
+    </section>
+
+    <section id="analytics-section" class="analytics-wrap">
+        <h2>Team Analytics</h2>
+        <div id="analytics-container" class="analytics-grid"></div>
+    </section>
+
+    <section class="table-wrap">
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th>Label</th>
+            <th>Team Alpha</th>
+            <th>Team Beta</th>
+            <th>Team Gamma</th>
+            <th>Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section class="add-data-section">
+      <h2>Add New Entry</h2>
+      <form id="addRowForm">
+        <div class="form-group">
+          <label for="newLabel">Sprint/Period Label</label>
+          <input id="newLabel" placeholder="e.g., Sprint 1, Q1 2025" required />
+        </div>
+        <div class="form-group team-inputs-wrapper">
+          <label>Team Velocity Points</label>
+          <div id="addRowTeamInputs"></div>
+        </div>
+        <button type="submit">Add Entry</button>
+      </form>
+    </section>
+
+    <section class="calculator-wrap">
+      <h2>Story Point Target Calculator</h2>
+      <p class="note">Calculate target story points based on team capacity and velocity</p>
+
+      <div class="calculator-grid">
+        <div class="calc-input-group">
+          <label for="weeksInSprint">Weeks in sprint:</label>
+          <input id="weeksInSprint" type="number" min="1" max="8" value="2" />
+        </div>
+
+        <div class="calc-input-group">
+          <label for="numberOfDevs">Number of Devs:</label>
+          <input id="numberOfDevs" type="number" min="1" max="50" value="5" />
+        </div>
+
+        <div class="calc-input-group">
+          <label for="hoursPerDay">Hours working per day:</label>
+          <input id="hoursPerDay" type="number" min="1" max="24" step="0.5" value="5.5" />
+        </div>
+
+        <div class="calc-input-group">
+          <label for="daysOff">Total days off (individual devs):</label>
+          <input id="daysOff" type="number" min="0" max="100" value="3" />
+        </div>
+
+        <div class="calc-input-group">
+          <label for="holidays">Holiday days (affects all devs):</label>
+          <input id="holidays" type="number" min="0" max="50" value="0" />
+        </div>
+
+        <div class="calc-input-group">
+          <label for="lastVelocity">Velocity from last sprint:</label>
+          <input id="lastVelocity" type="number" min="0" max="500" value="30" />
+        </div>
+      </div>
+
+      <div class="calculator-results">
+        <h3>Calculated Metrics</h3>
+        <div class="results-grid">
+          <div class="result-item">
+            <span class="result-label">Total workable hours per week:</span>
+            <span id="workableHoursPerWeek" class="result-value">27.5</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Total hours off for all devs:</span>
+            <span id="totalHoursOff" class="result-value">16.5</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Max hours for all devs:</span>
+            <span id="maxHours" class="result-value">275</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Actual hours available:</span>
+            <span id="actualHoursAvailable" class="result-value">0.94</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Target velocity:</span>
+            <span id="targetVelocity" class="result-value">28.2</span>
+          </div>
+          <div class="result-item highlight">
+            <span class="result-label">Target Story Points:</span>
+            <span id="targetStoryPoints" class="result-value">28.2</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="keyboard-shortcuts-help">
+      <details>
+        <summary>Keyboard Shortcuts</summary>
+        <div class="shortcuts-grid">
+          <div class="shortcut-item">
+            <kbd class="key">Ctrl/Cmd</kbd> + <kbd class="key">E</kbd>
+            <span class="shortcut-desc">Export CSV</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd class="key">Ctrl/Cmd</kbd> + <kbd class="key">S</kbd>
+            <span class="shortcut-desc">Save data</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd class="key">Delete</kbd> / <kbd class="key">Backspace</kbd>
+            <span class="shortcut-desc">Delete focused row</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd class="key">Enter</kbd>
+            <span class="shortcut-desc">Save edit (when editing)</span>
+          </div>
+          <div class="shortcut-item">
+            <kbd class="key">Esc</kbd>
+            <span class="shortcut-desc">Cancel edit</span>
+          </div>
+        </div>
+      </details>
+    </section>
+  </div>
+
+  <div id="custom-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3 id="modal-title">Confirmation</h3>
+        <p id="modal-message"></p>
+        <div class="modal-actions">
+            <button id="modal-confirm-btn" class="btn btn-danger">Confirm</button>
+            <button id="modal-cancel-btn" class="btn">Cancel</button>
+        </div>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/calculator.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/dom.js"></script>
+  <script src="js/importExport.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
