@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   renderTeamInputs();
+  renderProjections();
   renderAddRowInputs();
   renderTable();
   initChart();

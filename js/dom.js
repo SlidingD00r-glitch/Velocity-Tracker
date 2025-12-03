@@ -25,6 +25,7 @@ function renderTeamInputs() {
       initChart();
       renderAddRowInputs();
       renderAnalytics();
+      renderProjections();
       saveState();
     });
 
@@ -182,6 +183,7 @@ function saveRowEdit(rowIdx) {
     renderTable();
     initChart();
     renderAnalytics();
+    renderProjections();
     saveState();
     showMessage(messageEl, 'Row updated', 'success', 1500);
 }
@@ -204,6 +206,7 @@ function addTeam() {
   renderTable();
   initChart();
   renderAnalytics();
+  renderProjections();
   saveState();
   showMessage(messageEl, `Added ${newTeam.name}`, 'success', 1500);
 }
@@ -222,6 +225,7 @@ function removeTeam(idx) {
         renderTable();
         initChart();
         renderAnalytics();
+        renderProjections();
         saveState();
         showMessage(messageEl, `Removed ${teamName}`, 'info', 1500);
     });
@@ -241,6 +245,7 @@ function addMultipleRows(rows) {
     renderTable();
     initChart();
     renderAnalytics();
+    renderProjections();
 }
 
 function deleteRow(index) {
@@ -250,6 +255,7 @@ function deleteRow(index) {
   renderTable();
   initChart();
   renderAnalytics();
+  renderProjections();
 }
 
 function renderAnalytics() {
@@ -302,6 +308,37 @@ function renderAnalytics() {
         </div>
     `;
     container.appendChild(totalItem);
+}
+
+function renderProjections() {
+    const container = document.getElementById('projections-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    state.teamData.forEach(team => {
+        const data = team.data;
+        const last3 = data.length > 3 ? data.slice(-3) : data;
+        const sum = last3.reduce((a, b) => a + (Number(b) || 0), 0);
+        const avg = last3.length ? sum / last3.length : 0;
+        const last3Str = last3.join(', ');
+
+        const item = document.createElement('div');
+        item.className = 'projection-item';
+        item.style.borderLeftColor = team.color;
+        
+        item.innerHTML = `
+            <h3>${escapeHtml(team.name)}</h3>
+            <div class="stat-row">
+                <span class="stat-label">Last 3 Sprints:</span>
+                <span class="stat-val small">${last3Str || '-'}</span>
+            </div>
+            <div class="stat-row highlight">
+                <span class="stat-label">Projected Velocity:</span>
+                <span class="stat-val large">${avg.toFixed(2)}</span>
+            </div>
+        `;
+        container.appendChild(item);
+    });
 }
 
 function showConfirmationModal(message, onConfirm) {
@@ -377,6 +414,7 @@ function setupDOMEventListeners() {
         renderTable();
         initChart();
         renderAnalytics();
+        renderProjections();
         addRowForm.reset();
         saveState();
     });
@@ -410,6 +448,7 @@ function setupDOMEventListeners() {
                 renderAddRowInputs();
                 renderTable();
                 initChart();
+                renderProjections();
             });
         });
     }
@@ -474,4 +513,3 @@ function setupDOMEventListeners() {
         }
     });
 }
-
