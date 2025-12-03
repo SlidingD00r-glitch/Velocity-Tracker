@@ -2,6 +2,12 @@
 
 A minimal, local, client-side Team Velocity Tracker. Open `index.html` in your browser to use.
 
+# To Install
+
+Download as Zip, decompress and launch Velocity App.html using any browser. 
+
+Local Storage is used, but it is highly recommended to use CSV export/import for maintaining data.
+
 Features
 - Import CSV (format below)
 - Export current data to CSV
@@ -42,7 +48,3 @@ Usage
 - Use the file picker to import a CSV and the `Export CSV` button to download current data.
 - Add rows manually using the form below the table.
 
-Next steps (optional)
-- Add persistent storage (localStorage) to save across browser reloads.
-- Add CSV column mapping for different team names.
-- Add per-team velocity averages and other analytics.
